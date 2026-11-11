@@ -6,8 +6,8 @@
 `default_nettype none
 
 // Analog black box: the layout in gds/ is the design; this stub only declares the ports.
-// Pin functions: see info.yaml and PLAN.md section 3.8.
-module tt_um_robertliu4_pll (
+// Pin functions: see info.yaml and PLAN.md section 2.
+module tt_um_robertliu4_dsm (
     input  wire       VGND,
     input  wire       VDPWR,    // 3.3v core power supply
 //    input  wire       VAPWR,    // second analog power supply (VAA)

@@ -1,4 +1,4 @@
-"""Dummy tile layout to prove the Tiny Tapeout GF flow end to end (PLAN.md §5, W1 item 3).
+"""Dummy tile layout to prove the Tiny Tapeout GF flow end to end (PLAN.md §7).
 
 Builds gds/<top>.gds and lef/<top>.lef for the 2x2 analog tile:
   - PR_bndry over the whole 711.20 x 325.36 um tile
@@ -6,8 +6,10 @@ Builds gds/<top>.gds and lef/<top>.lef for the 2x2 analog tile:
   - VDPWR / VGND power stripes on Metal4, 2 um wide, y = 5 ... 320.36 um
   - one std-cell inverter (filltie | inv_1 | filltie from gf180mcu_fd_sc_mcu7t5v0)
     with ua[0] -> I and ZN -> ua[1], rails tied to the stripes through via stacks
+  - a short Metal4 stub on ua[2], because info.yaml declares analog_pins: 3 and the
+    precheck wants every used ua pin connected (and every unused one left bare)
 This mirrors what magic_init_project.tcl from tt-support-tools draws, plus the
-inverter, without needing Magic. The real PLL layout replaces all of it.
+inverter, without needing Magic. The real modulator layout replaces all of it.
 
 Rules used (gf180mcuD techlef / via.rb): via 0.26 um square, 0.36 um apart in
 arrays, Mx >= 0.28 um wide (M1 0.23); every coordinate is on the 5 nm grid.
@@ -19,7 +21,7 @@ from pathlib import Path
 
 import gdstk
 
-TOP = "tt_um_robertliu4_pll"
+TOP = "tt_um_robertliu4_dsm"
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 DEF = HERE / "tt_analog_2x2.def"
@@ -125,6 +127,11 @@ def build_gds(width, height, pins):
     rect(top, M4, ua0_cx - 0.5, 0, ua0_cx + 0.5, i_cy + 0.25)
     rect(top, M4, ua1_cx - 0.5, z_cy - 0.25, z_cx + 0.25, z_cy + 0.25)
     rect(top, M4, ua1_cx - 0.5, 0, ua1_cx + 0.5, z_cy + 0.25)
+
+    # ua[2] (VCM_OUT in the real design): a 1 um wide stub running 5 um past the pin
+    ua2 = pins["ua[2]"]["rect"]
+    ua2_cx = (ua2[0] + ua2[2]) / 2
+    rect(top, M4, ua2_cx - 0.5, 0, ua2_cx + 0.5, ua2[3] + 5.0)
     return lib
 
 

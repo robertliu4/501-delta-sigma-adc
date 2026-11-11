@@ -5,21 +5,29 @@ DRAFT: fill in measured/post-layout numbers before submitting.
 
 ## How it works
 
-An integer-N charge-pump PLL that multiplies the 25 MHz reference on `clk` by N = 8, 12 or 16 (nominal 12, giving 300 MHz).
+A 2nd-order, 1-bit, fully differential switched-capacitor delta-sigma modulator (Boser-Wooley loop).
 
-- **VCO:** a 5-stage current-starved ring on 3.3 V devices with a degenerated V-to-I converter, running from an RC-filtered local supply.
-- **Dividers:** a true-single-phase-clock divide-by-4 prescaler, then a standard-cell divide-by-2/3/4.
-- **PFD:** standard-cell flip-flops with a reset delay. UP and DN are matched through an inverter and a transmission gate.
-- **Charge pump and loop filter:** a 40 µA current-steering charge pump with a unity-gain buffer that holds the dummy node at Vctrl, then a passive R-C1-C2 loop filter built from MOS capacitors and a poly resistor.
+- **Sampling:** the differential input on `ua[0]`/`ua[1]` is sampled at the `clk` rate (2 MHz nominal).
+- **Loop:** two switched-capacitor integrators shape the quantization noise away from low frequencies, with NTF = (1 − z⁻¹)². A comparator then makes the 1-bit decision.
+- **Output:** the bitstream comes out on `uo[0]`. Decimate it off chip (sinc³ filter, then an FFT) to get a high-resolution, low-bandwidth result.
+- **Expected performance:** at an oversampling ratio of 128 (7.8 kHz bandwidth at 2 MHz), the design target is about 80 dB SNDR at −6 dBFS.
 
-In OPEN_LOOP mode the charge pump is disconnected and Vctrl comes from `ua[0]`, so the VCO and dividers can be characterised on their own.
+Internals:
+- **Op-amps:** fully differential folded cascodes with switched-capacitor common-mode feedback.
+- **Comparator:** a StrongARM latch.
+- **References:** an on-chip resistor ladder from the 3.3 V supply with decoupling: VREFP 2.15 V, VCM 1.65 V, VREFN 1.15 V. The full scale is ±1 V differential.
+- **Clocking:** non-overlapping clocks generated from `clk` with standard cells.
 
 ## How to test
 
-1. Set `ui[2]` (OPEN_LOOP) = 0 and `ui[1:0]` = 01 (N = 12), apply 25 MHz on `clk`, and release `rst_n`.
-2. `uo[0]` should read 300 MHz / 16 = 18.75 MHz. `uo[2]` (FB_DIV) should be phase-locked to `uo[3]` (REF_OUT).
-3. Open-loop VCO curve: set OPEN_LOOP = 1, drive `ua[0]` from 1.0 to 2.8 V, and read `uo[1]` (VCO/64) on a frequency counter.
+1. Apply a 2 MHz clock on `clk`, set `ui[1:0]` = 01 (inputs shorted to VCM), and release `rst_n`.
+2. Capture `uo[0]` (DOUT) on the falling edge of `uo[1]` (CLK_OUT). The ones density should be about 0.5.
+3. Set `ui[1:0]` = 00 and drive a differential sine (for example 1 kHz, 0.5 V peak differential) into `ua[0]`/`ua[1]`, biased at the VCM on `ua[2]`.
+4. Capture at least 65,536 bits, then run sinc³ decimation and an FFT in Python to get SNDR.
+
+`ui[1:0]` = 10 or 11 selects an internal DC input of +Vref/4 or −Vref/4, which should give ones densities of 0.625 or 0.375. `ui[2]` = 1 bypasses the second integrator (1st-order mode).
 
 ## External hardware
 
-A frequency counter or oscilloscope. Optionally, a clean signal generator on `ui[7]` with REF_SEL (`ui[6]`) = 1, and a DC source on `ua[0]`.
+- A low-distortion differential signal source (an audio-grade generator plus a single-ended-to-differential driver biased from `ua[2]`).
+- A way to capture the bitstream: the demo board's RP2040/RP2350, or a logic analyzer.
