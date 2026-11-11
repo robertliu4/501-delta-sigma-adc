@@ -1,0 +1,43 @@
+Fully differential folded-cascode OTA, first pass (ideal bias currents, ideal CMFB)
+sizes (W/finger um, L um, fingers): {'inp': (10.0, 2.0, 6), 'tail': (5.5, 1.0, 2), 'ptop': (10.0, 4.0, 7), 'pcas': (8.5, 0.5, 2), 'ncas': (5.0, 0.5, 1), 'nbot': (10.0, 8.0, 2)}
+I_tail 40 uA, I_fold 20 uA per side; core current 80 uA; open-loop load 0.70 pF per side, beta 0.59
+
+corner          Adc    GBW    fc*    PM  gain>=40dB over Vod   A@-1.6/0/+1.6 V  vn band  1/f fc     SR  t_0.1%  min sat
+                 dB    MHz    MHz   deg               V diff                dB    uVrms     kHz   V/us      ns       mV
+tt_27C_3v3     88.5   63.4   37.9  77.2     -2.45 .. +2.45    82.3/88.5/82.3     5.91    30.5   53.4    44.4   131 mp3
+ss_85C_3v0     88.3   54.4   32.5  77.1     -2.05 .. +2.05    66.6/88.3/66.6     6.48    26.2   53.1    48.6   157 mp3
+ff_0C_3v6      88.1   69.9   41.7  77.2     -2.81 .. +2.81    79.3/88.1/79.3     5.50    32.2   53.7    41.9   114 mp3
+sf_27C_3v3     87.7   62.4   37.2  77.5     -2.46 .. +2.46    82.0/87.7/82.0     6.06    30.9   53.3    45.2   122 mp3
+fs_27C_3v3     89.1   64.5   38.6  76.9     -2.45 .. +2.45    82.3/89.1/82.3     5.77    30.0   53.6    43.6   133 mn3
+
+* fc = loop crossover with beta = 0.59 (PM is measured there). vn band = input-referred noise
+  integrated over 10 Hz - 7.8 kHz; 1/f fc = where the noise density is sqrt(2) x the white floor.
+  SR and t_0.1% come from the closed-loop step (0.75 V diff output, Cs 0.5 / Ci 1 / Cp 0.1 / CL 0.3 pF).
+  min sat = smallest |Vds| - |Vdsat| over the signal-path devices at the operating point.
+
+operating point, tt (Vds, Vdsat, Id, gm):
+  mt   Vds +0.692  Vdsat +0.213  Id  +39.77 uA  gm   320.0 uS  gm/Id   8.0
+  m1   Vds +2.175  Vdsat +0.104  Id  +19.88 uA  gm   295.3 uS  gm/Id  14.9
+  m2   Vds +2.175  Vdsat +0.104  Id  +19.88 uA  gm   295.3 uS  gm/Id  14.9
+  mp3  Vds +0.433  Vdsat +0.302  Id  +39.64 uA  gm   181.3 uS  gm/Id   4.6
+  mp4  Vds +0.433  Vdsat +0.302  Id  +39.64 uA  gm   181.3 uS  gm/Id   4.6
+  mp5  Vds +1.218  Vdsat +0.177  Id  +19.74 uA  gm   203.0 uS  gm/Id  10.3
+  mp6  Vds +1.218  Vdsat +0.177  Id  +19.74 uA  gm   203.0 uS  gm/Id  10.3
+  mn5  Vds +1.227  Vdsat +0.167  Id  +19.74 uA  gm   205.3 uS  gm/Id  10.4
+  mn6  Vds +1.227  Vdsat +0.167  Id  +19.74 uA  gm   205.3 uS  gm/Id  10.4
+  mn3  Vds +0.422  Vdsat +0.277  Id  +19.74 uA  gm   106.2 uS  gm/Id   5.4
+  mn4  Vds +0.422  Vdsat +0.277  Id  +19.74 uA  gm   106.2 uS  gm/Id   5.4
+  input-device Cgg (M1) 267 fF
+
+in-band (10 Hz - 7.8 kHz) input-referred noise by device pair, tt (uV rms; 1/f and thermal):
+  M1/M2 input pair         1/f  5.31   thermal  0.83
+  MN3/MN4 bottom sources   1/f  1.92   thermal  0.53
+  MP3/MP4 top sources      1/f  1.53   thermal  0.71
+  MP5/MP6 PMOS cascodes    1/f  0.09   thermal  0.01
+  MN5/MN6 NMOS cascodes    1/f  0.04   thermal  0.00
+  mbpc                     1/f  0.00   thermal  0.00
+  mbt                      1/f  0.00   thermal  0.00
+  MT tail                  1/f  0.00   thermal  0.00
+  mbnc                     1/f  0.00   thermal  0.00
+  mbp                      1/f  0.00   thermal  0.00
+  mbn                      1/f  0.00   thermal  0.00
