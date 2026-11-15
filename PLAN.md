@@ -25,7 +25,8 @@ Tiny Tapeout **TTGF26c**, closes **Mon Dec 7 2026, 20:00 UTC (12:00 PST)**. Solo
   - 5.5–6.5 µV rms of in-band noise.
 - **The Tiny Tapeout flow is proven.** On Oct 27 the dummy tile passed all 12 precheck checks, including GF180MCU DRC and antenna ([run 40534489155](https://github.com/robertliu4/501-pll/actions/runs/40534489155)). GitHub Pages hosts the 3D viewer at <https://robertliu4.github.io/501-pll/>.
   - The dummy is now renamed `tt_um_robertliu4_dsm`, with a Metal4 stub on `ua[2]` for `analog_pins: 3`.
-  - **It needs a push to re-run the precheck under the new name.**
+  - Pushed on Nov 14: the precheck passes under the new name ([run 43665193187](https://github.com/robertliu4/501-pll/actions/runs/43665193187)), and the viewer shows the renamed tile.
+  - **Pushing a tag also runs the workflow, and its viewer job deploys to Pages.** The job names no environment, so the `main`-only rule doesn't apply. Push tags only before or together with `main`, so that `main` deploys last.
 - **Carried over from the PLL work:**
   - `sim/ngspice/spice.py` (models, corners, runner).
   - gm/ID tables (`01_devices.py`).
@@ -268,7 +269,7 @@ Weeks run Monday to Sunday. Exams in early December are why everything aims at *
 
 | Week | Dates | Work | Exit criterion |
 |---|---|---|---|
-| **W1** | Wed Nov 11 – Sun Nov 15 | 1) **Today:** install OrbStack (or Docker) and IIC-OSIC-TOOLS. Push the renamed dummy, and check that the precheck is green as `tt_um_robertliu4_dsm`.<br>2) Model the reference loading (§3.6), then pick shared or separate DAC caps.<br>3) OTA1: real bias, SC CMFB, CM loop stability. OTA2 at 1/4 current.<br>4) Comparator, switches, non-overlap clock generator.<br>5) **Transistor-level modulator transient:** 4,096–8,192 cycles at 2 MHz, ideal references first, then the ladder.<br>6) Redraw OTA1 in xschem, and lay out the input pair (common centroid) to learn the rules. | **CHECKPOINT Sun Nov 15:** transistor-level loop ≥ 70 dB SNDR at tt |
+| **W1** | Wed Nov 11 – Sun Nov 15 | 1) **Today:** install OrbStack (or Docker) and IIC-OSIC-TOOLS. ~~Push the renamed dummy, and check that the precheck is green as `tt_um_robertliu4_dsm`.~~ Done Nov 14.<br>2) Model the reference loading (§3.6), then pick shared or separate DAC caps.<br>3) OTA1: real bias, SC CMFB, CM loop stability. OTA2 at 1/4 current.<br>4) Comparator, switches, non-overlap clock generator.<br>5) **Transistor-level modulator transient:** 4,096–8,192 cycles at 2 MHz, ideal references first, then the ladder.<br>6) Redraw OTA1 in xschem, and lay out the input pair (common centroid) to learn the rules. | **CHECKPOINT Sun Nov 15:** transistor-level loop ≥ 70 dB SNDR at tt |
 | **W2** | Nov 16 – Nov 22 | Corners and the reference/bias across PVT. Layout: OTA1, OTA2, comparator, switches with the MOM cap arrays (unit caps, common centroid), clock generator (hand-placed standard cells), bias, ladder. **DRC and LVS clean per block.** | **Sun Nov 22:** all Tier 0 blocks LVS-clean → Tier 1 go/no-go |
 | **W3** | Nov 23 – Nov 29 | Floorplan, decap fill, top-level routing on M1–M4, power stripes, pins per the template DEF. Top-level DRC/LVS. LEF from the final GDS. **Precheck green on the real design.** Extract the MOM caps and check that a1 is within ±10 %. | **Sun Nov 29:** real GDS passes precheck |
 | **W4** | Nov 30 – Fri Dec 4 | Post-layout: OTA1 settling with extracted parasitics, plus one loop transient at tt/ss/ff. Fix and re-run the precheck. Write `docs/info.md` (test procedure, Python decimation script). **Submit Fri Dec 4.** | Submitted |
@@ -400,12 +401,11 @@ Run every row at tt_27C_3v3, ss_85C_3v0, ff_0C_3v6, sf and fs, unless the row sa
 
 1. Read §0, §2 and §11, and flag anything wrong (especially A12 and A13).
 2. **Install OrbStack (or Docker Desktop), then IIC-OSIC-TOOLS** (`curl -fsSL https://osic.tools/install.sh | bash`, about 20 GB).
-3. **Push** the pivot commits (and the `pll-plan` tag), so the precheck re-runs on the renamed dummy.
-4. **Ask on the TT Discord:**
+3. **Ask on the TT Discord:**
    - Does the TTGF26c board route `ua[0..5]`?
    - What are the GF analog-pin R/C?
    - Is there any guidance on GF VDPWR noise?
-5. Buy or confirm the slot.
+4. Buy or confirm the slot.
 
 ---
 
