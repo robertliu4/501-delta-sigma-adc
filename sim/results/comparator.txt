@@ -1,0 +1,14 @@
+StrongARM comparator + matched inverters + NOR SR latch (dsm_net.py comp), clk 2 MHz
+(the first version drove a NAND SR latch directly and had 20-50 mV of hysteresis at tt)
+inputs from VCM +- dv/2 through 5 kohm with 0.2 pF to ground
+
+corner        t_dec +1000uV  t_dec -1000uV    t_dec +30uV    t_dec -30uV  kick (1 mV)
+                         ns             ns             ns             ns      mV diff
+tt_27C_3v3          0.55 ok        0.48 ok        0.65 ok        0.60 ok          6.1
+ss_85C_3v0          0.90 ok        0.80 ok        1.10 ok        1.00 ok          5.7
+ff_0C_3v6           0.39 ok        0.35 ok        0.44 ok        0.40 ok          6.5
+sf_27C_3v3          0.65 ok        0.55 ok        0.75 ok        0.65 ok          6.7
+fs_27C_3v3          0.48 ok        0.40 ok        0.60 ok        0.48 ok          5.3
+
+  t_dec = clk rise to q settled on the correct side; ok = final decision correct.
+  The DAC switches about T/2 - t_no later (245 ns at 2 MHz, 95 ns at 5 MHz).

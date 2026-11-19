@@ -14,8 +14,8 @@ A 2nd-order, 1-bit, fully differential switched-capacitor delta-sigma modulator 
 
 Internals:
 - **Op-amps:** fully differential folded cascodes with switched-capacitor common-mode feedback.
-- **Comparator:** a StrongARM latch.
-- **References:** an on-chip resistor ladder from the 3.3 V supply with decoupling: VREFP 2.15 V, VCM 1.65 V, VREFN 1.15 V. The full scale is ±1 V differential.
+- **Comparator:** a StrongARM latch followed by an SR latch.
+- **References:** an on-chip resistor ladder from the 3.3 V supply with decoupling: VREFP 2.65 V, VCM 1.65 V, VREFN 0.65 V. The 1-bit DAC uses separate capacitors (half the sampling capacitor) switched between VREFP and VREFN, so the references see the same load every cycle. The full scale is ±1 V differential.
 - **Clocking:** non-overlapping clocks generated from `clk` with standard cells.
 
 ## How to test

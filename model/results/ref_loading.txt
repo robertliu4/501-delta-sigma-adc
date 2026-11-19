@@ -1,0 +1,61 @@
+Reference loading by the 1-bit DAC (model/ref_loading.py)
+N = 32768, OSR 128, fs 2 MHz, -6 dBFS tone at bin 15 (HD3 in band), Cs1 0.5 / Ci1 1 / Cs2 0.1 / Ci2 0.2 pF
+Only the reference is non-ideal here (ideal op-amps and switches, no noise).
+VREFP err = VREFP at the end of each cycle minus its unloaded value, averaged.
+
+Ideal references: SQNR 85.1 dB, HD3 -103.4 dBc
+
+scheme                                       I_lad     R_th   SNDR     HD3    VREFP err
+                                                uA     kohm     dB     dBc           mV
+shared, 1 V spread, 30 pF                       10    74.92   54.3   -54.4       -13.13
+shared, 1 V spread, 30 pF                       30    24.97   71.3   -71.7        -2.60
+shared, 1 V spread, 30 pF                      100     7.49   85.8  -104.1        -0.07
+shared, 1 V spread, 30 pF                      300     2.50   85.2  -103.3        -0.00
+shared, 1 V spread, 30 pF                     1000     0.75   85.1  -103.4         0.00
+shared, 1 V spread, 30 pF                     3000     0.25   85.1  -103.4         0.00
+
+shared, 1 V spread, 100 pF                      10    74.92   52.6   -52.6       -15.61
+shared, 1 V spread, 100 pF                      30    24.97   63.8   -63.8        -4.61
+shared, 1 V spread, 100 pF                     100     7.49   81.2   -83.1        -0.78
+shared, 1 V spread, 100 pF                     300     2.50   86.1  -107.2        -0.03
+shared, 1 V spread, 100 pF                    1000     0.75   84.9  -103.2        -0.00
+shared, 1 V spread, 100 pF                    3000     0.25   85.1  -103.4         0.00
+
+separate, 1 V spread (Cdac = Cs), 30 pF         10    74.92   84.0  -105.3       -15.68
+separate, 1 V spread (Cdac = Cs), 30 pF         30    24.97   86.9  -106.3        -3.10
+separate, 1 V spread (Cdac = Cs), 30 pF        100     7.49   84.0  -105.3        -0.09
+separate, 1 V spread (Cdac = Cs), 30 pF        300     2.50   84.7  -106.8        -0.00
+separate, 1 V spread (Cdac = Cs), 30 pF       1000     0.75   85.1  -103.4         0.00
+separate, 1 V spread (Cdac = Cs), 30 pF       3000     0.25   85.1  -103.4         0.00
+
+separate, 2 V spread (Cdac = Cs/2), 30 pF       10    52.20   84.4  -104.6       -18.56
+separate, 2 V spread (Cdac = Cs/2), 30 pF       30    17.40   85.2  -110.4        -3.89
+separate, 2 V spread (Cdac = Cs/2), 30 pF      100     5.22   86.6  -104.0        -0.15
+separate, 2 V spread (Cdac = Cs/2), 30 pF      300     1.74   83.1  -102.5        -0.00
+separate, 2 V spread (Cdac = Cs/2), 30 pF     1000     0.52   85.1  -103.4        -0.00
+separate, 2 V spread (Cdac = Cs/2), 30 pF     3000     0.17   85.1  -103.4        -0.00
+
+Why shared caps are sometimes clean: a kick takes Cs*(VREFP - VCM - v*u/2) from VREFP and the
+mirror image from VREFN, so right after it Vref_diff = Vref0 - e*(1 - v*u), with e ~ Cs/C_dec.
+The DAC delivers v*Vref_diff = v*(Vref0 - e) + e*u: because v^2 = 1 the signal part is LINEAR
+in u (a gain error). Distortion comes only from the part of a kick still left in the NEXT cycle,
+when v has changed (v[n]*v[n-1]*u is not linear). A node that recovers within T/2 is clean; a
+slow node (tau >> T) keeps the average droop, and then
+  HD3 ~ (Z_PP - Z_PN) * fs * (Cs1 + Cs2) * A^2 / 4      (A in units of Vref)
+where Z_PP - Z_PN is the ladder's VREFP transfer resistance for a current taken from VREFP and
+returned into VREFN. More decap makes it WORSE in between, because it slows the recovery.
+
+  100 pF, I_lad  10 uA (slow node): predicted HD3  -51.7 dBc, simulated  -52.6 dBc
+  100 pF, I_lad  30 uA (slow node): predicted HD3  -61.2 dBc, simulated  -63.8 dBc
+
+Separate DAC caps take the same charge every cycle, so they are clean at any ladder current and
+any decap. That lets the decap filter supply and ladder noise (which the bitstream would
+otherwise mix down from around fs/2) without trading it against distortion.
+
+
+kT/C cost of the separate DAC cap (in-band noise power relative to shared, same Cs1):
+  Cdac = Cs   (1 V spread): x2.00 (3.0 dB)
+  Cdac = Cs/2 (2 V spread): x1.50 (1.8 dB)
+  beta in phi2, shared      : 0.53
+  beta in phi2, Cdac = Cs/2 : 0.47
+  beta in phi2, Cdac = Cs   : 0.42
