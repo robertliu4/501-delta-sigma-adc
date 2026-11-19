@@ -1,6 +1,6 @@
-# 501-pll → delta-sigma ADC
+# 501-delta-sigma-adc
 
-2nd-order, 1-bit, switched-cap **delta-sigma ADC modulator** for **Tiny Tapeout TTGF26c** (GF180MCU, 3.3 V), due **2026-12-07 20:00 UTC**. The project started as an integer-N PLL; that work is kept at tag [`pll-plan`](https://github.com/robertliu4/501-pll/tree/pll-plan).
+2nd-order, 1-bit, switched-cap **delta-sigma ADC modulator** for **Tiny Tapeout TTGF26c** (GF180MCU, 3.3 V), due **2026-12-07 20:00 UTC**. The project started as an integer-N PLL; that work is kept at tag [`pll-plan`](https://github.com/robertliu4/501-delta-sigma-adc/tree/pll-plan).
 
 - **[PLAN.md](PLAN.md):** the plan, architecture decisions and trade-offs, schedule, risks and open assumptions. Start here.
 - `model/dsm_model.py`: behavioural modulator model that sets the block specs. Results are in `model/results/`.
